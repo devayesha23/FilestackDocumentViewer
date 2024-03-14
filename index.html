@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Filestack Document Preview App</title>
+    <script src="https://static.filestackapi.com/filestack-js/3.x.x/filestack.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #EF4A25;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #uploadBtn {
+            background-color: #EF4A25;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #uploadBtn:hover {
+            background-color: #0056b3;
+        }
+        #documentPreview {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Filestack Document Preview App</h1>
+        <button id="uploadBtn">Upload Document</button>
+        <div id="documentPreview"></div>
+    </div>
+
+    <script>
+        const client = filestack.init('A18L3T2eWRemxYIGwGlZsz');
+
+        let currentMode = 'preview';
+
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            client.picker({
+                accept: [
+                    'application/pdf',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.oasis.opendocument.text',
+                    'application/vnd.oasis.opendocument.presentation',
+                    'image/gif',
+                    'image/tiff',
+                    'image/jpeg',
+                    'image/png',
+                    'text/html',
+                    'text/plain',
+                    'application/illustrator',
+                    'image/vnd.adobe.photoshop'
+                ],
+                onUploadDone: (res) => {
+                    const handle = res.filesUploaded[0].handle;
+                    generateDocumentPreview(handle);
+                }
+            }).open();
+        });
+
+        function generateDocumentPreview(handle) {
+            const documentContainer = document.getElementById('documentPreview');
+            const previewUrl = `https://cdn.filestackcontent.com/preview/${handle}`;
+            const slideUrl = `https://cdn.filestackcontent.com/slide/${handle}`;
+
+            const toggleButton = document.createElement('button');
+            toggleButton.textContent = 'Toggle View';
+            toggleButton.addEventListener('click', () => {
+                if (currentMode === 'preview') {
+                    documentContainer.innerHTML = `<iframe src="${slideUrl}" style="width: 100%; height: 500px;" frameborder="0"></iframe>`;
+                    currentMode = 'slide';
+                } else {
+                    documentContainer.innerHTML = `<iframe src="${previewUrl}" style="width: 100%; height: 500px;" frameborder="0"></iframe>`;
+                    currentMode = 'preview';
+                }
+            });
+
+            documentContainer.innerHTML = `<iframe src="${previewUrl}" style="width: 100%; height: 500px;" frameborder="0"></iframe>`;
+            documentContainer.appendChild(toggleButton);
+        }
+    </script>
+</body>
+</html>
